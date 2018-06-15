@@ -108,19 +108,19 @@ int main(int argc, char *argv[]) {
           // Send 1
 
           if ( my_PE_num != npes-1 ){
-            MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, DOWN_TAG, MPI_COMM_WORLD);
+            MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, DOWN, MPI_COMM_WORLD);
           }
 
           if ( my_PE_num != 0 ){
-            MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, DOWN_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, DOWN, MPI_COMM_WORLD, &status);
           }
 
           if ( my_PE_num != 0 ){
-            MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, UP_TAG, MPI_COMM_WORLD);
+            MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, UP, MPI_COMM_WORLD);
           }
 
           if ( my_PE_num != npes-1 ){
-            MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, UP_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, UP, MPI_COMM_WORLD, &status);
           }
 
      //   MPI_Send( t, COLUMNS, MPI_FLOAT, up, UP_TAG, MPI_COMM_WORLD);
