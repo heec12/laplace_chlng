@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &npes);
 
     // verify only NPES PEs are being used
-
+/*
     if(npes != NPES) {
       if(my_PE_num==0) {
         printf("This code must be run with %d PEs\n", NPES);
@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
       MPI_Finalize();
       exit(1);
     }
+*/
 
     // PE 0 asks for input
 
