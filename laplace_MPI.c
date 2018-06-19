@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
     double dt;
     struct timeval start_time, stop_time, elapsed_time;
 
-    int        npes;                // number of PEs
+    int        nnpes;               // number of PEs in 1D
+    int        npes=nnpes*nnpes;    // number of PEs
     int        my_PE_num;           // my PE number
     double     dt_global=100;       // delta t across all PEs
     MPI_Status status;              // status returned by MPI calls
@@ -178,9 +179,20 @@ void initialize(int npes, int my_PE_num){
     }
 
     // Local boundry condition endpoints
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/*
     tMin = (my_PE_num)*100.0/npes;
     tMax = (my_PE_num+1)*100.0/npes;
+*/
+    double re_my_PE_num;
+    if (my_PE_num < nnpes)
+        re_my_PE_num = 0
+    if (nnpes <= my_PE_num < 2*nnpes)
+        re_my_PE_num = 1
+    if (2*nnpes <= my_PE_num < 3*nnpes)
+        re_my_PE_num = 2
+    
+    tMin = (re_my_PE_num)*100.0/nnpes;
+    tMax = (re_my_PE_num+1)*100.0/nnpes;
 
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
