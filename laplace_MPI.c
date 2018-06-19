@@ -30,16 +30,17 @@
 #include <sys/time.h>
 #include <mpi.h>
 
-#define COLUMNS      1000
-#define ROWS_GLOBAL  1000        // this is a "global" row count
-#define NPES            4        // number of processors
-#define ROWS (ROWS_GLOBAL/NPES)  // number of real local rows
+#define COLUMNS_GLOBAL   1000                  // this is a "global" column count
+#define ROWS_GLOBAL      1000                  // this is a "global" row count
+#define NPES                4                  // number of processors
+#define ROWS             (ROWS_GLOBAL/NPES)    // number of real local rows
+#define COLUMNS          (COLUMNS_GLOBAL/NPES) // number of real local columns
 
 // communication tags
 #define DOWN     
-#define UP       101
+#define UP               101
 
-#define MAX_TEMP_ERROR 0.01
+#define MAX_TEMP_ERROR   0.01
 
 double Temperature[ROWS+2][COLUMNS+2];
 double Temperature_last[ROWS+2][COLUMNS+2];
@@ -171,7 +172,8 @@ void initialize(int npes, int my_PE_num){
 
     double tMin, tMax;  //Local boundary limits
     int i,j;
-
+    int PEi, PEj;
+    
     for(i = 0; i <= ROWS+1; i++){
         for (j = 0; j <= COLUMNS+1; j++){
             Temperature_last[i][j] = 0.0;
@@ -183,6 +185,7 @@ void initialize(int npes, int my_PE_num){
     tMin = (my_PE_num)*100.0/npes;
     tMax = (my_PE_num+1)*100.0/npes;
 */
+/*    
     double re_my_PE_num;
     if (my_PE_num < nnpes)
         re_my_PE_num = 0
@@ -190,9 +193,13 @@ void initialize(int npes, int my_PE_num){
         re_my_PE_num = 1
     if (2*nnpes <= my_PE_num < 3*nnpes)
         re_my_PE_num = 2
+  */
     
-    tMin = (re_my_PE_num)*100.0/nnpes;
-    tMax = (re_my_PE_num+1)*100.0/nnpes;
+    PEi = my_PE_num % npes;
+    PEj = (my_PE_num - PEi) / npes;
+    
+    tMin = (PEj * 100.0) / nnpes;
+    tMax = ((PEj + 1) * 100.0) / nnpes;
 
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
