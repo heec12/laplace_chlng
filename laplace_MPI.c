@@ -37,7 +37,7 @@
 #define COLUMNS          (COLUMNS_GLOBAL/NPES) // number of real local columns
 
 // communication tags
-#define DOWN     
+#define DOWN             100
 #define UP               101
 
 #define MAX_TEMP_ERROR   0.01
@@ -57,10 +57,9 @@ int main(int argc, char *argv[]) {
     double dt;
     struct timeval start_time, stop_time, elapsed_time;
 
-    int        nnpes;               // number of PEs in 1D
-    int        npes=nnpes*nnpes;    // number of PEs
+    int        npes = NPES*NPES;
     int        my_PE_num;           // my PE number
-    double     dt_global=100;       // delta t across all PEs
+    double     dt_global = 100;       // delta t across all PEs
     MPI_Status status;              // status returned by MPI calls
 
     // the usual MPI startup routines
@@ -195,11 +194,11 @@ void initialize(int npes, int my_PE_num){
         re_my_PE_num = 2
   */
     
-    PEi = my_PE_num % npes;
-    PEj = (my_PE_num - PEi) / npes;
+    PEi = my_PE_num % NPES;
+    PEj = (my_PE_num - PEi) / NPES;
     
-    tMin = (PEj * 100.0) / nnpes;
-    tMax = ((PEj + 1) * 100.0) / nnpes;
+    tMin = (PEj * 100.0) / NPES;
+    tMax = ((PEj + 1) * 100.0) / NPES;
 
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
@@ -208,12 +207,12 @@ void initialize(int npes, int my_PE_num){
     }
 
     // Top boundary (PE 0 only)
-    if (my_PE_num == 0)
+    if (PEi == 0)
       for (j = 0; j <= COLUMNS+1; j++)
         Temperature_last[0][j] = 0.0;
 
     // Bottom boundary (Last PE only)
-    if (my_PE_num == npes-1)
+    if (PEi == NPES-1)
       for (j=0; j<=COLUMNS+1; j++)
         Temperature_last[ROWS+1][j] = (100.0/COLUMNS) * j;
 
