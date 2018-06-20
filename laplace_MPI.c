@@ -42,8 +42,8 @@
 
 #define MAX_TEMP_ERROR   0.01
 
-void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperature[]);
-void track_progress(int iter);
+void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperature);
+void track_progress(int iter, int ROWS, int COLUMNS, double *Temperature);
 
 int main(int argc, char *argv[]) {
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
         // periodically print test values - only for PE in lower corner
         if((iteration % 100) == 0) {
             if (my_PE_num == npes-1){
-                track_progress(iteration);
+                track_progress(iteration,ROWS, COLUMNS, Temperature_last);
             }
         }
 
@@ -199,11 +199,11 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperat
         re_my_PE_num = 2
   */
     
-    PEi = my_PE_num % NPES;
-    PEj = (my_PE_num - PEi) / NPES;
+    PEi = my_PE_num % npes;
+    PEj = (my_PE_num - PEi) / npes;
     
-    tMin = (PEj * 100.0) / NPES;
-    tMax = ((PEj + 1) * 100.0) / NPES;
+    tMin = (PEj * 100.0) / npes;
+    tMax = ((PEj + 1) * 100.0) / npes;
 
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
@@ -217,7 +217,7 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperat
         Temperature_last[0][j] = 0.0;
 
     // Bottom boundary (Last PE only)
-    if (PEi == NPES-1)
+    if (PEi == npes-1)
       for (j=0; j<=COLUMNS+1; j++)
         Temperature_last[ROWS+1][j] = (100.0/COLUMNS) * j;
 
@@ -228,7 +228,7 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperat
 }
 
 // only called by last PE
-void track_progress(int iteration) {
+void track_progress(int iteration, int ROWS, int COLUMNS, double Temperature[][]) {
 
     int i;
 
