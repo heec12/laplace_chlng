@@ -32,9 +32,9 @@
 
 #define COLUMNS_GLOBAL   1000                  // this is a "global" column count
 #define ROWS_GLOBAL      1000                  // this is a "global" row count
-#define NPES                4                  // number of processors
-#define ROWS             (ROWS_GLOBAL/NPES)    // number of real local rows
-#define COLUMNS          (COLUMNS_GLOBAL/NPES) // number of real local columns
+//#define NPES                4                  // number of processors
+//#define ROWS             (ROWS_GLOBAL/NPES)    // number of real local rows
+//#define COLUMNS          (COLUMNS_GLOBAL/NPES) // number of real local columns
 
 // communication tags
 #define DOWN             100
@@ -42,12 +42,8 @@
 
 #define MAX_TEMP_ERROR   0.01
 
-double Temperature[ROWS+2][COLUMNS+2];
-double Temperature_last[ROWS+2][COLUMNS+2];
-
-void initialize(int npes, int my_PE_num);
+void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperature[]);
 void track_progress(int iter);
-
 
 int main(int argc, char *argv[]) {
 
@@ -57,7 +53,8 @@ int main(int argc, char *argv[]) {
     double dt;
     struct timeval start_time, stop_time, elapsed_time;
 
-    int        npes = NPES*NPES;
+    int        nnpes; // = NPES*NPES;
+    int        npes; // = NPES*NPES;
     int        my_PE_num;           // my PE number
     double     dt_global = 100;       // delta t across all PEs
     MPI_Status status;              // status returned by MPI calls
@@ -66,7 +63,13 @@ int main(int argc, char *argv[]) {
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_PE_num);
-    MPI_Comm_size(MPI_COMM_WORLD, &npes);
+    MPI_Comm_size(MPI_COMM_WORLD, &nnpes);
+
+    npes = sqrt( nnpes );
+    const int ROWS = ROWS_GLOBAL / npes;
+    const int COLUMNS = COLUMNS_GLOBAL / npes;
+    double Temperature[ROWS+2][COLUMNS+2];
+    double Temperature_last[ROWS+2][COLUMNS+2];
 
     // verify only NPES PEs are being used
 /*
@@ -93,7 +96,7 @@ int main(int argc, char *argv[]) {
 
     if (my_PE_num==0) gettimeofday(&start_time,NULL);
 
-    initialize(npes, my_PE_num);
+    initialize(npes, my_PE_num, ROWS, COLUMNS, Temperature_last);
 
     while ( dt_global > MAX_TEMP_ERROR && iteration <= max_iterations ) {
 
@@ -168,7 +171,8 @@ int main(int argc, char *argv[]) {
 
 
 
-void initialize(int npes, int my_PE_num){
+
+void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperature_last[]){
 
     double tMin, tMax;  //Local boundary limits
     int i,j;
@@ -217,8 +221,11 @@ void initialize(int npes, int my_PE_num){
       for (j=0; j<=COLUMNS+1; j++)
         Temperature_last[ROWS+1][j] = (100.0/COLUMNS) * j;
 
-}
+    for( i = 0; i <= ROWS+1; i++ )
+      for( j = 0; j <= COLUMNS+1; j++ )
+        fprintf(stderr, "me: %d T=%e (i,j)=%d %d\n", my_PE_num, Temperature_last[i][j], i, j);
 
+}
 
 // only called by last PE
 void track_progress(int iteration) {
