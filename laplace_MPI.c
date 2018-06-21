@@ -68,8 +68,17 @@ int main(int argc, char *argv[]) {
     npes = sqrt( nnpes );
     const int ROWS = ROWS_GLOBAL / npes;
     const int COLUMNS = COLUMNS_GLOBAL / npes;
-    double **Temperature[ROWS+2][COLUMNS+2];
-    double **Temperature_last[ROWS+2][COLUMNS+2];
+    double **Temperature;
+    double **Temperature_last;
+
+    /* allocate the array */
+    Temperature = malloc((ROWS+2) * sizeof(*Temperature));
+    Temperature_last = malloc((ROWS+2) * sizeof(*Temperature_last));
+    for (i=0; i<ROWS+2; i++)
+    {
+        Temperature[i] = malloc((COLUMNS+2) * sizeof(*Temperature[i]));
+        Temperature_last[i] = malloc((COLUMNS+2) * sizeof(*Temperature_last[i]));
+    }
 
     // verify only NPES PEs are being used
 /*
@@ -98,12 +107,6 @@ int main(int argc, char *argv[]) {
     if (my_PE_num==0) gettimeofday(&start_time,NULL);
 
 
-    /* allocate the array */
-    Temperature_last = malloc(ROWS * sizeof *Temperature_last);
-    for (i=0; i<ROWS; i++)
-    {
-        Temperature_last[i] = malloc(COLUMNS * sizeof *Temperature_last[i]);
-    }
 
 
     initialize(npes, my_PE_num, ROWS, COLUMNS, Temperature_last);
@@ -177,6 +180,12 @@ int main(int argc, char *argv[]) {
         printf("Total time was %f seconds.\n", elapsed_time.tv_sec+elapsed_time.tv_usec/1000000.0);
     }
 
+    // Free up memory allocated to temperature arrays.
+    for (i=0; i<ROWS+2; i++)
+    {
+        free(Temperature[i]);
+        free(Temperature_last[i]);
+    }
     MPI_Finalize();
 }
 
@@ -210,16 +219,16 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
         re_my_PE_num = 2
   */
     
-    PEi = my_PE_num % npes;
-    PEj = (my_PE_num - PEi) / npes;
+    PEj = my_PE_num % npes;
+    PEi = (my_PE_num - PEj) / npes;
     
-    tMin = (PEj * 100.0) / npes;
-    tMax = ((PEj + 1) * 100.0) / npes;
+    tMin = (PEi * 100.0) / npes;
+    tMax = ((PEi + 1) * 100.0) / npes;
 
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
       Temperature_last[i][0] = 0.0;
-      Temperature_last[i][COLUMNS+1] = tMin + ((tMax-tMin)/ROWS)*i;
+      Temperature_last[i][COLUMNS+1] = tMin + ((tMax-tMin)/(ROWS+1))*i;
     }
 
     // Top boundary (PE 0 only)
@@ -230,11 +239,22 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
     // Bottom boundary (Last PE only)
     if (PEi == npes-1)
       for (j=0; j<=COLUMNS+1; j++)
-        Temperature_last[ROWS+1][j] = (100.0/COLUMNS) * j;
+        Temperature_last[ROWS+1][j] = tMin + ((tMax-tMin)/(COLUMNS+1))*j;
+                                      //(((100.0/(COLUMNS+1)) * j)/npes)*(PEj+1);
 
-    for( i = 0; i <= ROWS+1; i++ )
-      for( j = 0; j <= COLUMNS+1; j++ )
-        fprintf(stderr, "me: %d T=%e (i,j)=%d %d\n", my_PE_num, Temperature_last[i][j], i, j);
+//    for( i = 0; i <= ROWS+1; i++ )
+//      for( j = 0; j <= COLUMNS+1; j++ )
+//        fprintf(stderr, "me: %d T=%e (i,j)=%d %d\n", my_PE_num, Temperature_last[i][j], i, j);
+
+     if (PEi ==npes -1)
+         for (j = 0; j <= COLUMNS+1; j++)
+            fprintf(stderr, "me: %d T = %e (i,j) = %d %d\n", my_PE_num, Temperature_last[ROWS+1][j], ROWS+1, j);
+     
+//     if (PEj ==npes -1)
+//         for (i= 0; i <= ROWS+1; i++)
+//           fprintf(stderr, "me: %d T = %e (i,j) = %d %d\n", my_PE_num, Temperature_last[i][COLUMNS+1], i, COLUMNS+1);
+
+//     fprintf(stderr,"my_PE_num: %d PEi = %d PEj = %d\n", my_PE_num, PEi, PEj); 
 
 }
 

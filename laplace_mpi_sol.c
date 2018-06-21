@@ -179,7 +179,7 @@ void initialize(int npes, int my_PE_num){
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
       Temperature_last[i][0] = 0.0;
-      Temperature_last[i][COLUMNS+1] = tMin + ((tMax-tMin)/ROWS)*i;
+      Temperature_last[i][COLUMNS+1] = tMin + ((tMax-tMin)/(ROWS+1))*i;
     }
 
     // Top boundary (PE 0 only)
@@ -190,7 +190,7 @@ void initialize(int npes, int my_PE_num){
     // Bottom boundary (Last PE only)
     if (my_PE_num == npes-1)
       for (j=0; j<=COLUMNS+1; j++)
-	Temperature_last[ROWS+1][j] = (100.0/COLUMNS) * j;
+	Temperature_last[ROWS+1][j] = (100.0/(COLUMNS+1)) * j;
 
 }
 
