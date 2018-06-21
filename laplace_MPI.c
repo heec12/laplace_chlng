@@ -42,8 +42,8 @@
 
 #define MAX_TEMP_ERROR   0.01
 
-void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperature);
-void track_progress(int iter, int ROWS, int COLUMNS, double *Temperature);
+void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Temperature);
+void track_progress(int iter, int ROWS, int COLUMNS, double** Temperature);
 
 int main(int argc, char *argv[]) {
 
@@ -68,8 +68,8 @@ int main(int argc, char *argv[]) {
     npes = sqrt( nnpes );
     const int ROWS = ROWS_GLOBAL / npes;
     const int COLUMNS = COLUMNS_GLOBAL / npes;
-    double Temperature[ROWS+2][COLUMNS+2];
-    double Temperature_last[ROWS+2][COLUMNS+2];
+    double **Temperature[ROWS+2][COLUMNS+2];
+    double **Temperature_last[ROWS+2][COLUMNS+2];
 
     // verify only NPES PEs are being used
 /*
@@ -94,9 +94,20 @@ int main(int argc, char *argv[]) {
 
     MPI_Bcast(&max_iterations, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
+
     if (my_PE_num==0) gettimeofday(&start_time,NULL);
 
+
+    /* allocate the array */
+    Temperature_last = malloc(ROWS * sizeof *Temperature_last);
+    for (i=0; i<ROWS; i++)
+    {
+        Temperature_last[i] = malloc(COLUMNS * sizeof *Temperature_last[i]);
+    }
+
+
     initialize(npes, my_PE_num, ROWS, COLUMNS, Temperature_last);
+
 
     while ( dt_global > MAX_TEMP_ERROR && iteration <= max_iterations ) {
 
@@ -172,7 +183,7 @@ int main(int argc, char *argv[]) {
 
 
 
-void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperature_last[]){
+void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Temperature_last){
 
     double tMin, tMax;  //Local boundary limits
     int i,j;
@@ -228,7 +239,7 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double *Temperat
 }
 
 // only called by last PE
-void track_progress(int iteration, int ROWS, int COLUMNS, double Temperature[][]) {
+void track_progress(int iteration, int ROWS, int COLUMNS, double** Temperature) {
 
     int i;
 
