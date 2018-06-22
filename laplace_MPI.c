@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
 
 void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Temperature_last){
 
-    double tMin, tMax;  //Local boundary limits
+    double tMin_b, tMax_b, tMin_l, tMax_l;  //Local boundary limits
     int i,j;
     int PEi, PEj;
     
@@ -222,13 +222,16 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
     PEj = my_PE_num % npes;
     PEi = (my_PE_num - PEj) / npes;
     
-    tMin = (PEi * 100.0) / npes;
-    tMax = ((PEi + 1) * 100.0) / npes;
+    tMin_b = (PEj * 100.0) / npes;
+    tMax_b = ((PEj + 1) * 100.0) / npes;
+
+    tMin_l = (PEi * 100.0) / npes;
+    tMax_l = ((PEi + 1) * 100.0) / npes;
 
     // Left and right boundaries
     for (i = 0; i <= ROWS+1; i++) {
       Temperature_last[i][0] = 0.0;
-      Temperature_last[i][COLUMNS+1] = tMin + ((tMax-tMin)/(ROWS+1))*i;
+      Temperature_last[i][COLUMNS+1] = tMin_l + ((tMax_l-tMin_l)/(ROWS+1))*i;
     }
 
     // Top boundary (PE 0 only)
@@ -239,20 +242,24 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
     // Bottom boundary (Last PE only)
     if (PEi == npes-1)
       for (j=0; j<=COLUMNS+1; j++)
-        Temperature_last[ROWS+1][j] = tMin + ((tMax-tMin)/(COLUMNS+1))*j;
+        Temperature_last[ROWS+1][j] = tMin_b + ((tMax_b-tMin_b)/(COLUMNS+1))*j;
                                       //(((100.0/(COLUMNS+1)) * j)/npes)*(PEj+1);
 
 //    for( i = 0; i <= ROWS+1; i++ )
 //      for( j = 0; j <= COLUMNS+1; j++ )
 //        fprintf(stderr, "me: %d T=%e (i,j)=%d %d\n", my_PE_num, Temperature_last[i][j], i, j);
 
+
+
      if (PEi ==npes -1)
          for (j = 0; j <= COLUMNS+1; j++)
             fprintf(stderr, "me: %d T = %e (i,j) = %d %d\n", my_PE_num, Temperature_last[ROWS+1][j], ROWS+1, j);
      
+
 //     if (PEj ==npes -1)
 //         for (i= 0; i <= ROWS+1; i++)
 //           fprintf(stderr, "me: %d T = %e (i,j) = %d %d\n", my_PE_num, Temperature_last[i][COLUMNS+1], i, COLUMNS+1);
+
 
 //     fprintf(stderr,"my_PE_num: %d PEi = %d PEj = %d\n", my_PE_num, PEi, PEj); 
 
