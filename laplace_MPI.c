@@ -39,10 +39,12 @@
 // communication tags
 #define DOWN             100
 #define UP               101
+#define RIGHT            102
+#define LEFT             103
 
 #define MAX_TEMP_ERROR   0.01
 
-void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Temperature);
+void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS, double** Temperature);
 void track_progress(int iter, int ROWS, int COLUMNS, double** Temperature);
 
 int main(int argc, char *argv[]) {
@@ -56,6 +58,7 @@ int main(int argc, char *argv[]) {
     int        nnpes; // = NPES*NPES;
     int        npes; // = NPES*NPES;
     int        my_PE_num;           // my PE number
+    int        PEi, PEj;
     double     dt_global = 100;       // delta t across all PEs
     MPI_Status status;              // status returned by MPI calls
 
@@ -66,10 +69,15 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &nnpes);
 
     npes = sqrt( nnpes );
+    PEj = my_PE_num % npes;
+    PEi = (my_PE_num - PEj) / npes;
+
     const int ROWS = ROWS_GLOBAL / npes;
     const int COLUMNS = COLUMNS_GLOBAL / npes;
     double **Temperature;
     double **Temperature_last;
+    double *temp_to_send, *temp_to_recv;
+    int PE_UP, PE_DOWN, PE_RIGHT, PE_LEFT;
 
     /* allocate the array */
     Temperature = malloc((ROWS+2) * sizeof(*Temperature));
@@ -79,6 +87,8 @@ int main(int argc, char *argv[]) {
         Temperature[i] = malloc((COLUMNS+2) * sizeof(*Temperature[i]));
         Temperature_last[i] = malloc((COLUMNS+2) * sizeof(*Temperature_last[i]));
     }
+    temp_to_send = malloc( ROWS * sizeof(double) );
+    temp_to_recv = malloc( ROWS * sizeof(double) );
 
     // verify only NPES PEs are being used
     /*
@@ -106,7 +116,7 @@ int main(int argc, char *argv[]) {
     if (my_PE_num==0) gettimeofday(&start_time,NULL);
 
     // Initialize Temperature array with boundary conditions for each PE
-    initialize(npes, my_PE_num, ROWS, COLUMNS, Temperature_last);
+    initialize(npes, my_PE_num, PEi, PEj, ROWS, COLUMNS, Temperature_last);
 
 
     while ( dt_global > MAX_TEMP_ERROR && iteration <= max_iterations ) {
@@ -122,7 +132,7 @@ int main(int argc, char *argv[]) {
         // COMMUNICATION PHASE: send and receive ghost rows for next iteration
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         // Send 1
-
+/*
         if ( my_PE_num != npes-1 ){
             MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, DOWN, MPI_COMM_WORLD);
         }
@@ -137,8 +147,68 @@ int main(int argc, char *argv[]) {
 
         if ( my_PE_num != npes-1 ){
             MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, UP, MPI_COMM_WORLD, &status);
+*/
+
+        PE_LEFT  = (PEj-1) + (npes*PEi);
+        PE_RIGHT = (PEj+1) + (npes*PEi);
+        PE_DOWN  = PEj + npes*(PEi+1);
+        PE_UP    = PEj + npes*(PEi-1);   
+
+        if ( PEi != npes-1 ){
+            MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, PE_DOWN, DOWN, MPI_COMM_WORLD);
+            printf("Sending my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
 
+        if ( PEi != 0 ){
+            MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, PE_UP, DOWN, MPI_COMM_WORLD, &status);
+            printf("Receiving my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
+        }
+
+        if ( PEi != 0 ){
+            MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, PE_UP, UP, MPI_COMM_WORLD);
+            printf("Sending my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
+        }
+
+        if ( PEi != npes-1 ){
+            MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, PE_DOWN, UP, MPI_COMM_WORLD, &status);
+            printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
+        }
+     
+        MPI_Barrier(MPI_COMM_WORLD);
+///////////////////////
+
+        if ( PEj != npes-1 ){
+            for(i = 0; i < ROWS; i++ )
+               temp_to_send[i] = Temperature[i+1][COLUMNS];
+            MPI_Send(&temp_to_send, ROWS, MPI_DOUBLE, PE_RIGHT, RIGHT, MPI_COMM_WORLD);
+            printf("Sending my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
+        }
+
+        if ( PEj != 0 ){
+            MPI_Recv(&temp_to_recv, ROWS, MPI_DOUBLE, PE_LEFT, RIGHT, MPI_COMM_WORLD, &status);
+            for(i = 0; i < ROWS; i++ )
+               Temperature_last[i+1][0] = temp_to_recv[i];
+            printf("Receiving my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
+        }
+
+
+        if ( PEj != 0 ){
+            for(i = 0; i < ROWS; i++ )
+               temp_to_send[i] = Temperature[i+1][1];
+            MPI_Send(&temp_to_send, ROWS, MPI_DOUBLE, PE_LEFT, LEFT, MPI_COMM_WORLD);
+            printf("Sending my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
+        }
+
+        if ( PEj != npes-1 ){
+            MPI_Recv(&temp_to_recv, ROWS, MPI_DOUBLE, PE_RIGHT, LEFT, MPI_COMM_WORLD, &status);
+            for(i = 0; i < ROWS; i++ )
+               Temperature_last[i+1][COLUMNS+1] = temp_to_recv[i];
+            printf("Receiving my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
+        }
+
+
+        printf("my_PE_num = %d", my_PE_num);
+        MPI_Barrier(MPI_COMM_WORLD);
         //   MPI_Send( t, COLUMNS, MPI_FLOAT, up, UP_TAG, MPI_COMM_WORLD);
 
         dt = 0.0;
@@ -183,17 +253,19 @@ int main(int argc, char *argv[]) {
         free(Temperature[i]);
         free(Temperature_last[i]);
     }
+    free(temp_to_send);
+    free(temp_to_recv);
+
     MPI_Finalize();
 }
 
 
 
 
-void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Temperature_last){
+void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS, double** Temperature_last){
 
     double tMin_b, tMax_b, tMin_l, tMax_l;  //Local boundary limits
     int i,j;
-    int PEi, PEj;
     
     for(i = 0; i <= ROWS+1; i++){
         for (j = 0; j <= COLUMNS+1; j++){
@@ -215,10 +287,7 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
     if (2*nnpes <= my_PE_num < 3*nnpes)
         re_my_PE_num = 2
     */
-    
-    PEj = my_PE_num % npes;
-    PEi = (my_PE_num - PEj) / npes;
-    
+     
     tMin_b = (PEj * 100.0) / npes;
     tMax_b = ((PEj + 1) * 100.0) / npes;
 
