@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     }
 
     // verify only NPES PEs are being used
-/*
+    /*
     if(npes != NPES) {
       if(my_PE_num==0) {
         printf("This code must be run with %d PEs\n", NPES);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
       MPI_Finalize();
       exit(1);
     }
-*/
+    */
 
     // PE 0 asks for input
 
@@ -100,15 +100,12 @@ int main(int argc, char *argv[]) {
     }
 
     // bcast max iterations to other PEs
-
     MPI_Bcast(&max_iterations, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 
     if (my_PE_num==0) gettimeofday(&start_time,NULL);
 
-
-
-
+    // Initialize Temperature array with boundary conditions for each PE
     initialize(npes, my_PE_num, ROWS, COLUMNS, Temperature_last);
 
 
@@ -123,26 +120,26 @@ int main(int argc, char *argv[]) {
         }
 
         // COMMUNICATION PHASE: send and receive ghost rows for next iteration
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-          // Send 1
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // Send 1
 
-          if ( my_PE_num != npes-1 ){
+        if ( my_PE_num != npes-1 ){
             MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, DOWN, MPI_COMM_WORLD);
-          }
+        }
 
-          if ( my_PE_num != 0 ){
+        if ( my_PE_num != 0 ){
             MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, DOWN, MPI_COMM_WORLD, &status);
-          }
+        }
 
-          if ( my_PE_num != 0 ){
+        if ( my_PE_num != 0 ){
             MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, UP, MPI_COMM_WORLD);
-          }
+        }
 
-          if ( my_PE_num != npes-1 ){
+        if ( my_PE_num != npes-1 ){
             MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, UP, MPI_COMM_WORLD, &status);
-          }
+        }
 
-     //   MPI_Send( t, COLUMNS, MPI_FLOAT, up, UP_TAG, MPI_COMM_WORLD);
+        //   MPI_Send( t, COLUMNS, MPI_FLOAT, up, UP_TAG, MPI_COMM_WORLD);
 
         dt = 0.0;
 
@@ -154,7 +151,7 @@ int main(int argc, char *argv[]) {
         }
 
         // find global dt
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         MPI_Reduce(&dt, &dt_global, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
         MPI_Bcast(&dt_global, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -205,11 +202,11 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
     }
 
     // Local boundry condition endpoints
-/*
+    /*
     tMin = (my_PE_num)*100.0/npes;
     tMax = (my_PE_num+1)*100.0/npes;
-*/
-/*    
+    */
+    /*    
     double re_my_PE_num;
     if (my_PE_num < nnpes)
         re_my_PE_num = 0
@@ -217,7 +214,7 @@ void initialize(int npes, int my_PE_num, int ROWS, int COLUMNS, double** Tempera
         re_my_PE_num = 1
     if (2*nnpes <= my_PE_num < 3*nnpes)
         re_my_PE_num = 2
-  */
+    */
     
     PEj = my_PE_num % npes;
     PEi = (my_PE_num - PEj) / npes;
