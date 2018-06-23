@@ -14,6 +14,17 @@ mpicc ./laplace_mpi_sol.c -o ./laplace_mpi_sol
 ```BASH
 mpiexec -np 4 ./laplace_mpi_sol
 ```
+### To use PGI OpenMPI on `ptah`
+Set the following env. vars:
+```BASH
+export PGI=/opt/pgi
+export PGI_PATH=${PGI}/linux86-64/2018
+export MANPATH=$MANPATH:$PGI_PATH/man:$PGI_PATH/mpi/openmpi/man
+export LM_LICENSE_FILE=$PGI/license.dat
+export PATH=$PGI_PATH/bin:$PGI_PATH/mpi/openmpi/bin:$PATH
+export LD_LIBRARY_PATH=$PGI_PATH/lib:$LD_LIBRARY_PATH
+```
+
 A warning message might show up at the end of a run on ptah as follows:
 ```BASH
 [ptah:21834] 3 more processes have sent help message help-btl-vader.txt / cma-permission-denied
