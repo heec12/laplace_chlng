@@ -59,25 +59,39 @@ int main(int argc, char *argv[]) {
     int        npes; // = NPES*NPES;
     int        my_PE_num;           // my PE number
     int        PEi, PEj;
+    int        ROWS;
+    int        COLUMNS;
+    double     **Temperature;
+    double     **Temperature_last;
+    double     *temp_to_send; 
+    double     *temp_to_recv;
+    int        PE_UP, PE_DOWN, PE_RIGHT, PE_LEFT;
+
     double     dt_global = 100;       // delta t across all PEs
     MPI_Status status;              // status returned by MPI calls
 
     // the usual MPI startup routines
-
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_PE_num);
     MPI_Comm_size(MPI_COMM_WORLD, &nnpes);
 
+    // decompose the proc num and compute the size of a subdomain.
+    // Assumed configuration:
+    //    0             1               ... npes-1
+    //    npes          npes+1          ... 2*npes-1
+    //    ...           ...             ... ...
+    //    (npes-1)*npes (npes-1)*npes+1 ... npes*npes-1
     npes = sqrt( nnpes );
     PEj = my_PE_num % npes;
     PEi = (my_PE_num - PEj) / npes;
+    ROWS = ROWS_GLOBAL / npes;
+    COLUMNS = COLUMNS_GLOBAL / npes;
 
-    const int ROWS = ROWS_GLOBAL / npes;
-    const int COLUMNS = COLUMNS_GLOBAL / npes;
-    double **Temperature;
-    double **Temperature_last;
-    double *temp_to_send, *temp_to_recv;
-    int PE_UP, PE_DOWN, PE_RIGHT, PE_LEFT;
+    // compute neighbor proc numbers.
+    PE_LEFT  = (PEj-1) + (npes*PEi);
+    PE_RIGHT = (PEj+1) + (npes*PEi);
+    PE_DOWN  = PEj + npes*(PEi+1);
+    PE_UP    = PEj + npes*(PEi-1);   
 
     /* allocate the array */
     Temperature = malloc((ROWS+2) * sizeof(*Temperature));
@@ -129,87 +143,59 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // COMMUNICATION PHASE: send and receive ghost rows for next iteration
-        //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        // Send 1
-/*
-        if ( my_PE_num != npes-1 ){
-            MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, DOWN, MPI_COMM_WORLD);
-        }
-
-        if ( my_PE_num != 0 ){
-            MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, DOWN, MPI_COMM_WORLD, &status);
-        }
-
-        if ( my_PE_num != 0 ){
-            MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, my_PE_num-1, UP, MPI_COMM_WORLD);
-        }
-
-        if ( my_PE_num != npes-1 ){
-            MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, my_PE_num+1, UP, MPI_COMM_WORLD, &status);
-*/
-
-        PE_LEFT  = (PEj-1) + (npes*PEi);
-        PE_RIGHT = (PEj+1) + (npes*PEi);
-        PE_DOWN  = PEj + npes*(PEi+1);
-        PE_UP    = PEj + npes*(PEi-1);   
-
         if ( PEi != npes-1 ){
             MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, PE_DOWN, DOWN, MPI_COMM_WORLD);
-            printf("Sending my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
+            //printf("Sending my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
 
         if ( PEi != 0 ){
             MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, PE_UP, DOWN, MPI_COMM_WORLD, &status);
-            printf("Receiving my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
+            //printf("Receiving my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
         }
 
         if ( PEi != 0 ){
             MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, PE_UP, UP, MPI_COMM_WORLD);
-            printf("Sending my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
+            //printf("Sending my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
         }
 
         if ( PEi != npes-1 ){
             MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, PE_DOWN, UP, MPI_COMM_WORLD, &status);
-            printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
+            //printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
      
-        MPI_Barrier(MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
 ///////////////////////
 
         if ( PEj != npes-1 ){
             for(i = 0; i < ROWS; i++ )
                temp_to_send[i] = Temperature[i+1][COLUMNS];
-            MPI_Send(&temp_to_send, ROWS, MPI_DOUBLE, PE_RIGHT, RIGHT, MPI_COMM_WORLD);
-            printf("Sending my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
+            MPI_Send(temp_to_send, ROWS, MPI_DOUBLE, PE_RIGHT, RIGHT, MPI_COMM_WORLD);
+            //printf("Sending my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
         }
 
         if ( PEj != 0 ){
-            MPI_Recv(&temp_to_recv, ROWS, MPI_DOUBLE, PE_LEFT, RIGHT, MPI_COMM_WORLD, &status);
+            MPI_Recv(temp_to_recv, ROWS, MPI_DOUBLE, PE_LEFT, RIGHT, MPI_COMM_WORLD, &status);
             for(i = 0; i < ROWS; i++ )
                Temperature_last[i+1][0] = temp_to_recv[i];
-            printf("Receiving my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
+            //printf("Receiving my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
         }
-
 
         if ( PEj != 0 ){
             for(i = 0; i < ROWS; i++ )
                temp_to_send[i] = Temperature[i+1][1];
-            MPI_Send(&temp_to_send, ROWS, MPI_DOUBLE, PE_LEFT, LEFT, MPI_COMM_WORLD);
-            printf("Sending my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
+            MPI_Send(temp_to_send, ROWS, MPI_DOUBLE, PE_LEFT, LEFT, MPI_COMM_WORLD);
+            //printf("Sending my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
         }
 
         if ( PEj != npes-1 ){
-            MPI_Recv(&temp_to_recv, ROWS, MPI_DOUBLE, PE_RIGHT, LEFT, MPI_COMM_WORLD, &status);
+            MPI_Recv(temp_to_recv, ROWS, MPI_DOUBLE, PE_RIGHT, LEFT, MPI_COMM_WORLD, &status);
             for(i = 0; i < ROWS; i++ )
                Temperature_last[i+1][COLUMNS+1] = temp_to_recv[i];
-            printf("Receiving my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
+            //printf("Receiving my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
         }
 
-
-        printf("my_PE_num = %d", my_PE_num);
-        MPI_Barrier(MPI_COMM_WORLD);
-        //   MPI_Send( t, COLUMNS, MPI_FLOAT, up, UP_TAG, MPI_COMM_WORLD);
+        //printf("my_PE_num = %d\n", my_PE_num);
+        //MPI_Barrier(MPI_COMM_WORLD);
 
         dt = 0.0;
 
@@ -253,6 +239,8 @@ int main(int argc, char *argv[]) {
         free(Temperature[i]);
         free(Temperature_last[i]);
     }
+    free(Temperature);
+    free(Temperature_last);
     free(temp_to_send);
     free(temp_to_recv);
 
@@ -317,9 +305,9 @@ void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS
 
 
 
-     if (PEi ==npes -1)
-         for (j = 0; j <= COLUMNS+1; j++)
-            fprintf(stderr, "me: %d T = %e (i,j) = %d %d\n", my_PE_num, Temperature_last[ROWS+1][j], ROWS+1, j);
+//     if (PEi ==npes -1)
+//         for (j = 0; j <= COLUMNS+1; j++)
+//            fprintf(stderr, "me: %d T = %e (i,j) = %d %d\n", my_PE_num, Temperature_last[ROWS+1][j], ROWS+1, j);
      
 
 //     if (PEj ==npes -1)
