@@ -30,8 +30,8 @@
 #include <sys/time.h>
 #include <mpi.h>
 
-#define COLUMNS_GLOBAL   1000                  // this is a "global" column count
-#define ROWS_GLOBAL      1000                  // this is a "global" row count
+#define COLUMNS_GLOBAL   10000                  // this is a "global" column count
+#define ROWS_GLOBAL      10000                  // this is a "global" row count
 //#define NPES                4                  // number of processors
 //#define ROWS             (ROWS_GLOBAL/NPES)    // number of real local rows
 //#define COLUMNS          (COLUMNS_GLOBAL/NPES) // number of real local columns
@@ -164,7 +164,6 @@ int main(int argc, char *argv[]) {
         }
      
         //MPI_Barrier(MPI_COMM_WORLD);
-///////////////////////
 
         if ( PEj != npes-1 ){
             for(i = 0; i < ROWS; i++ )
@@ -207,7 +206,6 @@ int main(int argc, char *argv[]) {
         }
 
         // find global dt
-        //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         MPI_Reduce(&dt, &dt_global, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
         MPI_Bcast(&dt_global, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -249,7 +247,6 @@ int main(int argc, char *argv[]) {
 
 
 
-
 void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS, double** Temperature_last){
 
     double tMin_b, tMax_b, tMin_l, tMax_l;  //Local boundary limits
@@ -266,6 +263,7 @@ void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS
     tMin = (my_PE_num)*100.0/npes;
     tMax = (my_PE_num+1)*100.0/npes;
     */
+
     /*    
     double re_my_PE_num;
     if (my_PE_num < nnpes)
