@@ -231,6 +231,13 @@ int main(int argc, char *argv[]) {
         printf("Total time was %f seconds.\n", elapsed_time.tv_sec+elapsed_time.tv_usec/1000000.0);
     }
 
+
+    // print temperature at the point (7500,9950)
+     if (my_PE_num==79){
+        printf("Global coord [7500,9950] is %f \n:", Temperature[500][950]);
+     }
+
+
     // Free up memory allocated to temperature arrays.
     for (i=0; i<ROWS+2; i++)
     {
