@@ -132,10 +132,11 @@ int main(int argc, char *argv[]) {
     // Initialize Temperature array with boundary conditions for each PE
     initialize(npes, my_PE_num, PEi, PEj, ROWS, COLUMNS, Temperature_last);
 
+   #pragma acc data copy(Temperature_last), create(Temperature)
 
     while ( dt_global > MAX_TEMP_ERROR && iteration <= max_iterations ) {
 
-    #pragma acc kernels
+        #pragma acc kernels
 
         // main calculation: average my four neighbors
         for(i = 1; i <= ROWS; i++) {
@@ -144,6 +145,8 @@ int main(int argc, char *argv[]) {
                                             Temperature_last[i][j+1] + Temperature_last[i][j-1]);
             }
         }
+
+        #pragma acc update host(Temperature[1:1][1:COLUMNS], Temperature[ROWS:1][1:COLUMNS]) 
 
         if ( PEi != npes-1 ){
             MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, PE_DOWN, DOWN, MPI_COMM_WORLD);
@@ -165,7 +168,11 @@ int main(int argc, char *argv[]) {
             //printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
      
+        #pragma acc update device(Temperature_last[0:1][1:COLUMNS], Temperature_last[ROWS+1:1][1:COLUMNS]) 
+
         //MPI_Barrier(MPI_COMM_WORLD);
+
+        #pragma acc update host(Temperature[ROWS:1][ROWS+1:1], Temperature[ROWS:1][ROWS+1:COLUMNS])
 
         if ( PEj != npes-1 ){
             for(i = 0; i < ROWS; i++ )
@@ -194,6 +201,8 @@ int main(int argc, char *argv[]) {
                Temperature_last[i+1][COLUMNS+1] = temp_to_recv[i];
             //printf("Receiving my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
         }
+
+        #pragma acc update device(Temperature_last[ROWS:1][ROWS+1:0], Temperature_last[ROWS:1][ROWS+1:COLUMNS+1])
 
         //printf("my_PE_num = %d\n", my_PE_num);
         //MPI_Barrier(MPI_COMM_WORLD);
@@ -234,6 +243,11 @@ int main(int argc, char *argv[]) {
         printf("\nMax error at iteration %d was %f\n", iteration-1, dt_global);
         printf("Total time was %f seconds.\n", elapsed_time.tv_sec+elapsed_time.tv_usec/1000000.0);
     }
+
+    // print temperature at the point (7500,9950)
+     if (my_PE_num==79){
+        printf("Global coord [7500,9950] is %f \n:", Temperature[500][950]);
+     }
 
     // Free up memory allocated to temperature arrays.
     for (i=0; i<ROWS+2; i++)
