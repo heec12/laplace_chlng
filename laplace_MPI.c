@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
             //printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
      
-        //MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
 
         if ( PEj != npes-1 ){
             for(i = 0; i < ROWS; i++ )
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 
         // periodically print test values - only for PE in lower corner
         if((iteration % 100) == 0) {
-            if (my_PE_num == npes-1){
+            if (my_PE_num == nnpes-1){
                 track_progress(iteration,ROWS, COLUMNS, Temperature_last);
             }
         }
@@ -233,9 +233,9 @@ int main(int argc, char *argv[]) {
 
 
     // print temperature at the point (7500,9950)
-     if (my_PE_num==79){
-        printf("Global coord [7500,9950] is %f \n:", Temperature[500][950]);
-     }
+    if (my_PE_num==79){
+       printf("Global coord [7500,9950] is %f \n:", Temperature[500][950]);
+    }
 
 
     // Free up memory allocated to temperature arrays.
@@ -333,7 +333,7 @@ void track_progress(int iteration, int ROWS, int COLUMNS, double** Temperature) 
 
     // output global coordinates so user doesn't have to understand decomposition
     for(i = 5; i >= 0; i--) {
-      printf("[%d,%d]: %5.2f  ", ROWS_GLOBAL-i, COLUMNS-i, Temperature[ROWS-i][COLUMNS-i]);
+      printf("[%d,%d]: %5.2f  ", ROWS_GLOBAL-i, COLUMNS_GLOBAL-i, Temperature[ROWS-i][COLUMNS-i]);
     }
     printf("\n");
 }
