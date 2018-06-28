@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_PE_num);
     MPI_Comm_size(MPI_COMM_WORLD, &nnpes);
+    MPI_Request reqs[4];
 
     // decompose the proc num and compute the size of a subdomain.
     // Assumed configuration:
@@ -144,36 +145,37 @@ int main(int argc, char *argv[]) {
         }
 
         if ( PEi != npes-1 ){
-            MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, PE_DOWN, DOWN, MPI_COMM_WORLD);
+            MPI_Isend(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, PE_DOWN, DOWN, MPI_COMM_WORLD, &reqs[0]);
             //printf("Sending my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
 
         if ( PEi != 0 ){
-            MPI_Recv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, PE_UP, DOWN, MPI_COMM_WORLD, &status);
+            MPI_Irecv(&Temperature_last[0][1], COLUMNS, MPI_DOUBLE, PE_UP, DOWN, MPI_COMM_WORLD, &reqs[1]);
             //printf("Receiving my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
         }
 
         if ( PEi != 0 ){
-            MPI_Send(&Temperature[1][1], COLUMNS, MPI_DOUBLE, PE_UP, UP, MPI_COMM_WORLD);
+            MPI_Isend(&Temperature[1][1], COLUMNS, MPI_DOUBLE, PE_UP, UP, MPI_COMM_WORLD, &reqs[2]);
             //printf("Sending my_PE_num = %d PE_UP = %d\n", my_PE_num, PE_UP);
         }
 
         if ( PEi != npes-1 ){
-            MPI_Recv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, PE_DOWN, UP, MPI_COMM_WORLD, &status);
+            MPI_Irecv(&Temperature_last[ROWS+1][1], COLUMNS, MPI_DOUBLE, PE_DOWN, UP, MPI_COMM_WORLD, &reqs[3]);
             //printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
      
+        //MPI_Waitall(4, reqs, status);
         MPI_Barrier(MPI_COMM_WORLD);
 
         if ( PEj != npes-1 ){
             for(i = 0; i < ROWS; i++ )
                temp_to_send[i] = Temperature[i+1][COLUMNS];
-            MPI_Send(temp_to_send, ROWS, MPI_DOUBLE, PE_RIGHT, RIGHT, MPI_COMM_WORLD);
+            MPI_Isend(temp_to_send, ROWS, MPI_DOUBLE, PE_RIGHT, RIGHT, MPI_COMM_WORLD, &reqs[0]);
             //printf("Sending my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
         }
 
         if ( PEj != 0 ){
-            MPI_Recv(temp_to_recv, ROWS, MPI_DOUBLE, PE_LEFT, RIGHT, MPI_COMM_WORLD, &status);
+            MPI_Irecv(temp_to_recv, ROWS, MPI_DOUBLE, PE_LEFT, RIGHT, MPI_COMM_WORLD, &reqs[1]);
             for(i = 0; i < ROWS; i++ )
                Temperature_last[i+1][0] = temp_to_recv[i];
             //printf("Receiving my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
@@ -182,19 +184,20 @@ int main(int argc, char *argv[]) {
         if ( PEj != 0 ){
             for(i = 0; i < ROWS; i++ )
                temp_to_send[i] = Temperature[i+1][1];
-            MPI_Send(temp_to_send, ROWS, MPI_DOUBLE, PE_LEFT, LEFT, MPI_COMM_WORLD);
+            MPI_Isend(temp_to_send, ROWS, MPI_DOUBLE, PE_LEFT, LEFT, MPI_COMM_WORLD, &reqs[2]);
             //printf("Sending my_PE_num = %d PE_LEFT = %d\n", my_PE_num, PE_LEFT);
         }
 
         if ( PEj != npes-1 ){
-            MPI_Recv(temp_to_recv, ROWS, MPI_DOUBLE, PE_RIGHT, LEFT, MPI_COMM_WORLD, &status);
+            MPI_Irecv(temp_to_recv, ROWS, MPI_DOUBLE, PE_RIGHT, LEFT, MPI_COMM_WORLD, &reqs[3]);
             for(i = 0; i < ROWS; i++ )
                Temperature_last[i+1][COLUMNS+1] = temp_to_recv[i];
             //printf("Receiving my_PE_num = %d PE_RIGHT = %d\n", my_PE_num, PE_RIGHT);
         }
 
+        // MPI_Barrier(MPI_COMM_WORLD);
         //printf("my_PE_num = %d\n", my_PE_num);
-        //MPI_Barrier(MPI_COMM_WORLD);
+        //MPI_Waitall(4, reqs, status);
 
         dt = 0.0;
 
@@ -220,7 +223,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Slightly more accurate timing and cleaner output
-    // MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // PE 0 finish timing and output values
     if (my_PE_num==0){

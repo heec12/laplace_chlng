@@ -44,8 +44,8 @@
 
 #define MAX_TEMP_ERROR   0.01
 
-void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS, double** Temperature);
-void track_progress(int iter, int ROWS, int COLUMNS, double** Temperature);
+void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS );
+void track_progress(int iter, int ROWS, int COLUMNS) ;
 
 int main(int argc, char *argv[]) {
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     if (my_PE_num==0) gettimeofday(&start_time,NULL);
 
     // Initialize Temperature array with boundary conditions for each PE
-    initialize(npes, my_PE_num, PEi, PEj, ROWS, COLUMNS, Temperature_last);
+    initialize(npes, my_PE_num, PEi, PEj, ROWS, COLUMNS );
 
 
     while ( dt_global > MAX_TEMP_ERROR && iteration <= max_iterations ) {
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
             //printf("Receiving my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
         }
      
-        MPI_Barrier(MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
 
         if ( PEj != npes-1 ){
             for(i = 0; i < ROWS; i++ )
@@ -211,8 +211,8 @@ int main(int argc, char *argv[]) {
 
         // periodically print test values - only for PE in lower corner
         if((iteration % 100) == 0) {
-            if (my_PE_num == nnpes-1){
-                track_progress(iteration,ROWS, COLUMNS, Temperature_last);
+            if (my_PE_num == npes-1){
+                track_progress(iteration, ROWS, COLUMNS );
             }
         }
 
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Slightly more accurate timing and cleaner output
-    // MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // PE 0 finish timing and output values
     if (my_PE_num==0){
@@ -231,12 +231,10 @@ int main(int argc, char *argv[]) {
         printf("Total time was %f seconds.\n", elapsed_time.tv_sec+elapsed_time.tv_usec/1000000.0);
     }
 
-
     // print temperature at the point (7500,9950)
-    if (my_PE_num==79){
-       printf("Global coord [7500,9950] is %f \n:", Temperature[500][950]);
-    }
-
+     if (my_PE_num==79){
+        printf("Global coord [7500,9950] is %f \n:", Temperature[500][950]);
+     }
 
     // Free up memory allocated to temperature arrays.
     for (i=0; i<ROWS+2; i++)
@@ -254,7 +252,7 @@ int main(int argc, char *argv[]) {
 
 
 
-void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS, double** Temperature_last){
+void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS ){
 
     double tMin_b, tMax_b, tMin_l, tMax_l;  //Local boundary limits
     int i,j;
@@ -325,7 +323,7 @@ void initialize(int npes, int my_PE_num, int PEi, int PEj, int ROWS, int COLUMNS
 }
 
 // only called by last PE
-void track_progress(int iteration, int ROWS, int COLUMNS, double** Temperature) {
+void track_progress(int iteration, int ROWS, int COLUMNS ) {
 
     int i;
 
@@ -333,7 +331,7 @@ void track_progress(int iteration, int ROWS, int COLUMNS, double** Temperature) 
 
     // output global coordinates so user doesn't have to understand decomposition
     for(i = 5; i >= 0; i--) {
-      printf("[%d,%d]: %5.2f  ", ROWS_GLOBAL-i, COLUMNS_GLOBAL-i, Temperature[ROWS-i][COLUMNS-i]);
+      printf("[%d,%d]: %5.2f  ", ROWS_GLOBAL-i, COLUMNS-i, Temperature[ROWS-i][COLUMNS-i]);
     }
     printf("\n");
 }
