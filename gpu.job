@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -p GPU-shared
+#SBATCH --ntasks-per-node 25
+#SBATCH --gres=gpu:p100:1
+#SBATCH -t 5
+#SBATCH -A  tr5fp7p
+//#SBATCH --reservation=workshopGPU
+
+echo "4000" | ./a.out

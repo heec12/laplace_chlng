@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
     // Initialize Temperature array with boundary conditions for each PE
     initialize(npes, my_PE_num, PEi, PEj, ROWS, COLUMNS, Temperature_last);
 
-   #pragma acc data copy(Temperature_last), create(Temperature)
+   #pragma acc data copyin(Temperature_last[0:ROWS+1][0:COLUMNS+1]), copyout(Temperature[0:ROWS+1][0:COLUMNS+1])
 
     while ( dt_global > MAX_TEMP_ERROR && iteration <= max_iterations ) {
 
