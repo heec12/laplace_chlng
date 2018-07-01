@@ -1,12 +1,13 @@
 #!/bin/bash
 #SBATCH -p RM
 #SBATCH -t 5:00:00
-#SBATCH -N 1
-#SBATCH --ntasks-per-node 28
+#SBATCH -N 4
+#SBATCH --ntasks-per-node 25
 
 # echo commands to stdout
 set -x
 
+mpicc laplace_MPI_test2.c -fast
 # move to working directory
 #cd $SCRATCH
 
