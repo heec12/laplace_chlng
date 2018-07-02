@@ -213,8 +213,9 @@ int main(int argc, char *argv[]) {
         dt = 0.0;
 
         #pragma acc kernels
-
+        #pragma acc for independent
         for(i = 1; i <= ROWS; i++){
+            #pragma acc for independent
             for(j = 1; j <= COLUMNS; j++){
                 dt = fmax( fabs(Temperature[i][j]-Temperature_last[i][j]), dt);
                 Temperature_last[i][j] = Temperature[i][j];
