@@ -1,28 +1,27 @@
 + mpicc -acc laplace_hybrd.c -Minfo=accel -fast
 main:
-    136, Generating copy(Temperature_last[:ROWS+1][:COLUMNS+1])
-         Generating create(Temperature[:ROWS+1][:COLUMNS+1])
+    136, Generating create(Temperature[:ROWS+1][:COLUMNS+1])
+         Generating copy(Temperature_last[:ROWS+1][:COLUMNS+1])
     143, Loop is parallelizable
     145, Loop is parallelizable
          Accelerator kernel generated
          Generating Tesla code
         143, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
         145, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
-    153, Accelerator clause: upper bound for dimension 1 of array 'Temperature_last,Temperature' is unknown
+    153, Accelerator clause: upper bound for dimension 1 of array 'Temperature,Temperature_last' is unknown
          Accelerator clause: upper bound for dimension 0 of array 'Temperature' is unknown
          Generating update self(Temperature_last[:1][:1],Temperature[:1][:1])
          Accelerator clause: upper bound for dimension 0 of array 'Temperature_last' is unknown
     213, Accelerator clause: upper bound for dimension 1 of array 'Temperature_last' is unknown
          Accelerator clause: upper bound for dimension 0 of array 'Temperature_last' is unknown
          Generating update device(Temperature_last[:1][:1])
-    217, Complex loop carried dependence of Temperature->->,Temperature_last->-> prevents parallelization
-         Accelerator scalar kernel generated
+    217, Loop is parallelizable
+    219, Loop is parallelizable
          Accelerator kernel generated
          Generating Tesla code
-        217, #pragma acc loop seq
-        218, #pragma acc loop seq
-    217, Complex loop carried dependence of Temperature->-> prevents parallelization
-    218, Complex loop carried dependence of Temperature->->,Temperature_last->-> prevents parallelization
+        217, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+        219, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+        220, Generating implicit reduction(max:dt)
 + export I_MPI_JOB_RESPECT_PROCESS_PLACEMENT=0
 + I_MPI_JOB_RESPECT_PROCESS_PLACEMENT=0
 + mpirun -np 4 ./a.out
@@ -98,4 +97,4 @@ main:
 [9995,4995]: 44.25  [9996,4996]: 45.20  [9997,4997]: 46.16  [9998,4998]: 47.12  [9999,4999]: 48.08  [10000,5000]: 49.04  
 
 Max error at iteration 3578 was 0.009998
-Total time was 434.717523 seconds.
+Total time was 436.541858 seconds.

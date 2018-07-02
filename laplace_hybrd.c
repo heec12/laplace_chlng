@@ -149,7 +149,9 @@ int main(int argc, char *argv[]) {
         }
 
    //     #pragma acc update host(Temperature[1:1][1:COLUMNS], Temperature[ROWS:1][1:COLUMNS]) 
-        #pragma acc update host(Temperature, Temperature_last) 
+       // #pragma acc update host(Temperature[1:1][1:COLUMNS], Temperature_last[ROWS:1][1:COLUMNS]) 
+        #pragma acc update host(Temperature[1:1][1:COLUMNS],Temperature[ROWS:1][1:COLUMNS], Temperature[1:ROWS][1:1], Temperature[1:ROWS][COLUMNS:1])        
+
         if ( PEi != npes-1 ){
             MPI_Send(&Temperature[ROWS][1], COLUMNS, MPI_DOUBLE, PE_DOWN, DOWN, MPI_COMM_WORLD);
             //printf("Sending my_PE_num = %d PE_DOWN = %d\n", my_PE_num, PE_DOWN);
@@ -205,8 +207,8 @@ int main(int argc, char *argv[]) {
         }
 
         //#pragma acc update device(Temperature_last[ROWS:1][ROWS+1:0], Temperature_last[ROWS:1][ROWS+1:COLUMNS+1])
-        #pragma acc update device(Temperature_last)
-
+        //#pragma acc update device(Temperature_last)
+        #pragma acc update device(Temperature_last[0:1][1:COLUMNS], Temperature_last[ROWS+1:1][1:COLUMNS], Temperature_last[1:ROWS][0:1], Temperature_last[1:ROWS][COLUMNS+1:1])
         //printf("my_PE_num = %d\n", my_PE_num);
         //MPI_Barrier(MPI_COMM_WORLD);
 
