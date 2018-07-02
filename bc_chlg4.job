@@ -4,9 +4,6 @@
 #SBATCH -N 4
 #SBATCH --ntasks-per-node 25
 
-#module load cuda
-#module load mpi/pgi_openmpi
-
 # echo commands to stdout
 set -x
 

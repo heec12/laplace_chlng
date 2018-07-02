@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -p GPU
 #SBATCH -t 5:00:00
-#SBATCH -N 1
-#SBATCH --ntasks-per-node 4
+#SBATCH -N 4
+#SBATCH --ntasks-per-node 25
 #SBATCH --gres=gpu:p100:2
 
 module load cuda

@@ -1,0 +1,243 @@
++ mpicc -acc laplace_hybrd.c -Minfo=accel -fast
+main:
+    136, Generating copy(Temperature_last[:ROWS+1][:COLUMNS+1])
+         Generating create(Temperature[:ROWS+1][:COLUMNS+1])
+    143, Loop is parallelizable
+    145, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+        143, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+        145, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+    155, Generating update self(Temperature[1:ROWS][1],Temperature[ROWS][1:COLUMNS],Temperature[1][1:COLUMNS],Temperature[1:ROWS][COLUMNS])
+    215, Generating update device(Temperature_last[1:ROWS][:1],Temperature_last[ROWS+1][1:COLUMNS],Temperature_last[:1][1:COLUMNS],Temperature_last[1:ROWS][COLUMNS+1])
+    219, Loop is parallelizable
+    221, Loop is parallelizable
+         Accelerator kernel generated
+         Generating Tesla code
+        219, #pragma acc loop gang, vector(4) /* blockIdx.y threadIdx.y */
+        221, #pragma acc loop gang, vector(32) /* blockIdx.x threadIdx.x */
+        222, Generating implicit reduction(max:dt)
++ export I_MPI_JOB_RESPECT_PROCESS_PLACEMENT=0
++ I_MPI_JOB_RESPECT_PROCESS_PLACEMENT=0
++ mpirun -np 100 ./a.out
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 719: Launch failed (often invalid pointer dereference)
+call to cuMemFreeHost returned error 719: Launch failed (often invalid pointer dereference)
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+call to cuStreamSynchronize returned error 700: Illegal address during kernel execution
+call to cuMemFreeHost returned error 700: Illegal address during kernel execution
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code.. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+WARNING: A process refused to die despite all the efforts!
+This process may still be running and/or consuming resources.
+
+Host: gpu012
+PID:  31282
+
+--------------------------------------------------------------------------
+[gpu012.pvt.bridges.psc.edu:31272] 2 more processes have sent help message help-orte-odls-base.txt / orte-odls-base:could-not-kill
+[gpu012.pvt.bridges.psc.edu:31272] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[22317,1],86]
+  Exit code:    1
+--------------------------------------------------------------------------
