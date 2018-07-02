@@ -2,7 +2,7 @@
 #SBATCH -p RM
 #SBATCH -t 5:00:00
 #SBATCH -N 1
-#SBATCH --ntasks-per-node 4
+#SBATCH --ntasks-per-node 25
 
 module load cuda
 module load mpi/pgi_openmpi
@@ -12,7 +12,7 @@ set -x
 
 #mpicc laplace_MPI_test2.c -fast
 #mpicc -mp -acc laplace_hybrd.c -fast
-mpicc -acc laplace_hybrd.c -fast
+mpicc -acc laplace_hybrd.c -Minfo=accel -fast
 
 # move to working directory
 #cd $SCRATCH
